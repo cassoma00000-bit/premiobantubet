@@ -575,24 +575,57 @@ const PROVINCIAS = [
   "Malanje", "Moxico", "Namibe", "Uíge", "Zaire", "Bengo",
 ];
 
+type Metodo = "" | "express" | "iban";
+
 function ProfileFlow({ balance, onDone, onBack }: { balance: number; onDone: () => void; onBack: () => void }) {
   const [step, setStep] = useState(0);
-  const [data, setData] = useState({ nome: "", telemovel: "", provincia: "", email: "", idade: "", confirmar: false });
+  const [data, setData] = useState({
+    nome: "",
+    telemovel: "",
+    provincia: "",
+    email: "",
+    idade: "",
+    metodo: "" as Metodo,
+    conta: "",
+    confirmar: false,
+  });
 
-  const steps = useMemo(() => [
+  const baseSteps = useMemo(() => [
     { key: "nome", title: "Nome completo", label: "NOME COMPLETO", placeholder: "Ex: Daniel da Silva", icon: "👤", kind: "text" as const },
     { key: "telemovel", title: "Número de telemóvel", label: "TELEMOVEL", placeholder: "Ex: 923 456 789", icon: "📱", kind: "tel" as const },
     { key: "provincia", title: "Província", label: "SELECIONA A TUA PROVINCIA", placeholder: "Seleciona uma província", icon: "📍", kind: "select" as const },
     { key: "email", title: "Email", label: "ENDEREÇO DE EMAIL", placeholder: "exemplo@email.com", icon: "✉️", kind: "email" as const },
     { key: "idade", title: "Idade", label: "A TUA IDADE", placeholder: "Ex: 25", icon: "🎂", kind: "number" as const },
+    { key: "metodo", title: "Metodo de levantamento", label: "ESCOLHE COMO QUERES RECEBER OS TEUS GANHOS", placeholder: "", icon: "💳", kind: "metodo" as const },
+    {
+      key: "conta",
+      title: data.metodo === "iban" ? "Numero IBAN" : "Numero Express",
+      label: data.metodo === "iban" ? "IBAN" : "NUMERO EXPRESS",
+      placeholder: data.metodo === "iban" ? "Ex: AO06000600000000000000000" : "Ex: 923456789",
+      icon: data.metodo === "iban" ? "💳" : "📱",
+      kind: "conta" as const,
+    },
     { key: "confirmar", title: "Confirmação", label: "CONFIRMA OS TEUS DADOS", placeholder: "", icon: "✅", kind: "confirm" as const },
-  ], []);
+  ], [data.metodo]);
 
+  const steps = baseSteps;
   const current = steps[step];
   const total = steps.length;
-  const value = data[current.key as keyof typeof data] as string;
+  const rawValue = data[current.key as keyof typeof data];
+  const value = typeof rawValue === "string" ? rawValue : "";
+
+  const contaValid = data.metodo === "iban"
+    ? data.conta.replace(/\s/g, "").length === 21
+    : /^9\d{8}$/.test(data.conta.replace(/\s/g, ""));
+
   const canContinue =
-    current.kind === "confirm" ? data.confirmar : value && value.toString().trim().length > 0;
+    current.kind === "confirm"
+      ? data.confirmar
+      : current.kind === "metodo"
+      ? data.metodo !== ""
+      : current.kind === "conta"
+      ? contaValid
+      : !!value && value.toString().trim().length > 0;
 
   const handleNext = () => {
     if (step >= total - 1) {
@@ -606,6 +639,9 @@ function ProfileFlow({ balance, onDone, onBack }: { balance: number; onDone: () 
     if (step === 0) onBack();
     else setStep((s) => s - 1);
   };
+
+  const isLast = step >= total - 1;
+  const finalLabel = current.kind === "conta" ? "Levantar os meus ganhos" : isLast ? "Finalizar" : "Continuar";
 
   return (
     <section className="flex flex-1 flex-col px-5 pt-6">
@@ -637,9 +673,18 @@ function ProfileFlow({ balance, onDone, onBack }: { balance: number; onDone: () 
         <p className="text-xs font-bold tracking-[0.25em] text-muted-foreground">PASSO {step + 1}/{total}</p>
         <h3 className="mt-1 text-xl font-bold">{current.title}</h3>
 
-        <label className="mt-5 block text-[11px] font-bold tracking-[0.2em] text-muted-foreground">
-          {current.label}
-        </label>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {current.kind === "metodo" && "Escolhe como queres receber os teus ganhos."}
+          {current.kind === "conta" && (data.metodo === "iban"
+            ? "Introduz o teu IBAN (21 digitos)."
+            : "Introduz o teu numero Express (9 digitos, começa pelo 9).")}
+        </p>
+
+        {current.kind !== "metodo" && (
+          <label className="mt-5 block text-[11px] font-bold tracking-[0.2em] text-muted-foreground">
+            {current.label}
+          </label>
+        )}
 
         <div className="mt-2">
           {current.kind === "select" ? (
@@ -654,6 +699,48 @@ function ProfileFlow({ balance, onDone, onBack }: { balance: number; onDone: () 
                 {PROVINCIAS.map((p) => <option key={p} value={p} className="bg-card">{p}</option>)}
               </select>
             </div>
+          ) : current.kind === "metodo" ? (
+            <div className="mt-3 space-y-3">
+              {([
+                { id: "express", icon: "📱", title: "Express", desc: "Pagamento movel (9 digitos)" },
+                { id: "iban", icon: "💳", title: "IBAN", desc: "Transferencia bancaria (21 digitos)" },
+              ] as const).map((opt) => {
+                const active = data.metodo === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setData({ ...data, metodo: opt.id, conta: "" })}
+                    className={`flex w-full items-center gap-4 rounded-2xl border px-4 py-4 text-left transition ${
+                      active
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-input/30 hover:border-primary/60"
+                    }`}
+                  >
+                    <span className="grid h-11 w-11 place-items-center rounded-full bg-card/80 text-xl">
+                      {opt.icon}
+                    </span>
+                    <span className="flex-1">
+                      <span className="block text-lg font-bold text-foreground">{opt.title}</span>
+                      <span className="block text-sm text-muted-foreground">{opt.desc}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : current.kind === "conta" ? (
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-input/40 px-3">
+              <span className="text-muted-foreground">{current.icon}</span>
+              <input
+                type="text"
+                inputMode={data.metodo === "iban" ? "text" : "numeric"}
+                maxLength={data.metodo === "iban" ? 30 : 12}
+                value={data.conta}
+                onChange={(e) => setData({ ...data, conta: e.target.value })}
+                placeholder={current.placeholder}
+                className="w-full bg-transparent py-3 text-foreground outline-none placeholder:text-muted-foreground/60"
+              />
+            </div>
           ) : current.kind === "confirm" ? (
             <div className="space-y-2 rounded-xl border border-border bg-input/30 p-4 text-sm">
               <Row k="Nome" v={data.nome} />
@@ -661,6 +748,8 @@ function ProfileFlow({ balance, onDone, onBack }: { balance: number; onDone: () 
               <Row k="Província" v={data.provincia} />
               <Row k="Email" v={data.email} />
               <Row k="Idade" v={data.idade} />
+              <Row k="Metodo" v={data.metodo === "iban" ? "IBAN" : data.metodo === "express" ? "Express" : ""} />
+              <Row k={data.metodo === "iban" ? "IBAN" : "Numero"} v={data.conta} />
               <label className="mt-3 flex items-center gap-2 pt-2 text-foreground">
                 <input
                   type="checkbox"
@@ -697,7 +786,7 @@ function ProfileFlow({ balance, onDone, onBack }: { balance: number; onDone: () 
             : "bg-card text-muted-foreground/60"
         }`}
       >
-        {step >= total - 1 ? "Finalizar" : "Continuar"}
+        {finalLabel}
       </button>
     </section>
   );
