@@ -22,9 +22,11 @@ type Stage =
   | "reveal-win"
   | "reveal-lose"
   | "final"
+  | "vsl"
   | "register"
   | "profile"
   | "done";
+
 
 const TOTAL_ROUNDS = 12;
 const WINS_TOTAL = 6;
@@ -137,7 +139,8 @@ function Index() {
       )}
       {stage === "reveal-win" && <RevealWin amount={lastWin} onNext={nextRound} />}
       {stage === "reveal-lose" && <RevealLose onNext={nextRound} />}
-      {stage === "final" && <FinalPrize amount={balance} onContinue={() => setStage("register")} />}
+      {stage === "final" && <FinalPrize amount={balance} onContinue={() => setStage("vsl")} />}
+      {stage === "vsl" && <VslStage amount={balance} onContinue={() => setStage("register")} />}
       {stage === "register" && <RegisterIntro amount={balance} onContinue={() => setStage("profile")} />}
       {stage === "profile" && <ProfileFlow balance={balance} onDone={() => setStage("done")} onBack={() => setStage("register")} />}
       {stage === "done" && <Done amount={balance} onRestart={startGame} />}
@@ -522,6 +525,95 @@ function FinalPrize({ amount, onContinue }: { amount: number; onContinue: () => 
         <button onClick={onContinue} className="btn-primary btn-primary-hover mt-6 w-full py-4">
           Levantar prémio
         </button>
+      </div>
+    </section>
+  );
+}
+
+function VslStage({ amount, onContinue }: { amount: number; onContinue: () => void }) {
+  const [unlocked, setUnlocked] = useState(false);
+  const [secs, setSecs] = useState(60);
+
+  useEffect(() => {
+    const id = "converteai-smartplayer-sdk";
+    if (!document.getElementById(id)) {
+      const s = document.createElement("script");
+      s.id = id;
+      s.src = "https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js";
+      s.async = true;
+      document.head.appendChild(s);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (unlocked) return;
+    const id = setInterval(() => {
+      setSecs((s) => {
+        if (s <= 1) {
+          clearInterval(id);
+          setUnlocked(true);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [unlocked]);
+
+  return (
+    <section className="flex flex-1 flex-col px-4 pt-4 pb-8">
+      <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full bg-black/40 border border-white/10 px-4 py-1.5 text-sm">
+        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="font-bold">{formatKz(amount)} Kz</span>
+        <span className="text-muted-foreground">aguardando</span>
+      </div>
+      <h2 className="text-center text-base font-extrabold leading-snug px-2">
+        Veja agora como registar a sua conta BantuBet e liberar os seus ganhos em menos de{" "}
+        <span className="text-primary">2 minutos</span>
+      </h2>
+
+      <div
+        id="ifr_6a4411099f833d59d0f25a77_wrapper"
+        style={{ margin: "16px auto 0", width: "100%", maxWidth: 400 }}
+      >
+        <div
+          id="ifr_6a4411099f833d59d0f25a77_aspect"
+          style={{ position: "relative", padding: "178.21782178217822% 0 0 0" }}
+        >
+          <iframe
+            frameBorder={0}
+            allowFullScreen
+            src="about:blank"
+            id="ifr_6a4411099f833d59d0f25a77"
+            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+            referrerPolicy="origin"
+            onLoad={(e) => {
+              const el = e.currentTarget as HTMLIFrameElement;
+              if (el.dataset.loaded === "1") return;
+              el.dataset.loaded = "1";
+              el.src =
+                "https://scripts.converteai.net/220eed4f-7bc0-4763-844a-46ae45601574/players/6a4411099f833d59d0f25a77/v4/embed.html" +
+                (location.search || "?") +
+                "&vl=" +
+                encodeURIComponent(location.href);
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="mt-6">
+        {unlocked ? (
+          <button onClick={onContinue} className="btn-primary btn-primary-hover w-full py-4 text-base font-extrabold">
+            ➕ Cadastrar e levantar {formatKz(amount)} Kz
+          </button>
+        ) : (
+          <button disabled className="w-full rounded-2xl border border-white/10 bg-black/40 py-4 text-sm text-muted-foreground">
+            🔒 Aguarda {secs}s para liberar o cadastro
+          </button>
+        )}
+        <p className="mt-3 text-center text-[11px] text-muted-foreground">
+          Assiste ao vídeo para garantir o levantamento dos teus ganhos.
+        </p>
       </div>
     </section>
   );
