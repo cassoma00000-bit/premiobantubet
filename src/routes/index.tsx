@@ -27,7 +27,20 @@ type Stage =
   | "done";
 
 const TOTAL_ROUNDS = 12;
-const REWARDS = [5000, 10000, 15000, 20000];
+const WINS_TOTAL = 6;
+const REWARDS = [18000, 20000, 22000, 25000];
+
+function buildOutcomes(): boolean[] {
+  const arr = [
+    ...Array(WINS_TOTAL).fill(true),
+    ...Array(TOTAL_ROUNDS - WINS_TOTAL).fill(false),
+  ];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr as boolean[];
+}
 
 function formatKz(n: number) {
   return n.toLocaleString("fr-FR").replace(/\u202F/g, " ");
