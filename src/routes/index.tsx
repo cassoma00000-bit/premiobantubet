@@ -22,9 +22,11 @@ type Stage =
   | "reveal-win"
   | "reveal-lose"
   | "final"
+  | "vsl"
   | "register"
   | "profile"
   | "done";
+
 
 const TOTAL_ROUNDS = 12;
 const WINS_TOTAL = 6;
@@ -137,7 +139,8 @@ function Index() {
       )}
       {stage === "reveal-win" && <RevealWin amount={lastWin} onNext={nextRound} />}
       {stage === "reveal-lose" && <RevealLose onNext={nextRound} />}
-      {stage === "final" && <FinalPrize amount={balance} onContinue={() => setStage("register")} />}
+      {stage === "final" && <FinalPrize amount={balance} onContinue={() => setStage("vsl")} />}
+      {stage === "vsl" && <VslStage amount={balance} onContinue={() => setStage("register")} />}
       {stage === "register" && <RegisterIntro amount={balance} onContinue={() => setStage("profile")} />}
       {stage === "profile" && <ProfileFlow balance={balance} onDone={() => setStage("done")} onBack={() => setStage("register")} />}
       {stage === "done" && <Done amount={balance} onRestart={startGame} />}
