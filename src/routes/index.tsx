@@ -314,6 +314,8 @@ function Prepare({ round, countdown }: { round: number; countdown: number }) {
   );
 }
 
+type PickPhase = "show" | "shuffle" | "choose" | "revealed";
+
 function Pick({
   round,
   pickedCup,
@@ -325,49 +327,125 @@ function Pick({
   winningCup: number;
   onPick: (i: number) => void;
 }) {
-  const locked = pickedCup !== null;
+  // slotOf[cupId] = current slot index (0, 1, 2)
+  const [slotOf, setSlotOf] = useState<[number, number, number]>([0, 1, 2]);
+  const [phase, setPhase] = useState<PickPhase>("show");
+
+  // Reset whenever winningCup changes (new round)
+  useEffect(() => {
+    setSlotOf([0, 1, 2]);
+    setPhase("show");
+
+    // Show ball under winning cup for 1.2s
+    const showTimer = setTimeout(() => {
+      setPhase("shuffle");
+    }, 1300);
+
+    return () => clearTimeout(showTimer);
+  }, [winningCup]);
+
+  // Shuffle sequence
+  useEffect(() => {
+    if (phase !== "shuffle") return;
+    let swaps = 0;
+    const maxSwaps = 7 + Math.floor(Math.random() * 4); // 7-10 swaps
+    const id = setInterval(() => {
+      setSlotOf((prev) => {
+        // pick two distinct slot indices to swap
+        const a = Math.floor(Math.random() * 3);
+        let b = Math.floor(Math.random() * 3);
+        if (b === a) b = (a + 1) % 3;
+        // find which cup IDs are in slot a and slot b
+        const next = [...prev] as [number, number, number];
+        for (let i = 0; i < 3; i++) {
+          if (prev[i] === a) next[i] = b;
+          else if (prev[i] === b) next[i] = a;
+        }
+        return next;
+      });
+      swaps++;
+      if (swaps >= maxSwaps) {
+        clearInterval(id);
+        setTimeout(() => setPhase("choose"), 420);
+      }
+    }, 380);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  // Reveal after pick
+  useEffect(() => {
+    if (pickedCup !== null) setPhase("revealed");
+  }, [pickedCup]);
+
+  const locked = pickedCup !== null || phase !== "choose";
+
+  const heading =
+    phase === "show"
+      ? "Observa o copo!"
+      : phase === "shuffle"
+      ? "A misturar…"
+      : phase === "choose"
+      ? "Escolhe um copo!"
+      : "Revelando…";
+
   return (
     <section className="flex flex-1 flex-col px-5">
       <div className="text-center">
         <p className="mt-2 text-xs font-semibold tracking-[0.25em] text-muted-foreground">
           RODADA {round} DE {TOTAL_ROUNDS}
         </p>
-        <h2 className="mt-2 text-4xl font-extrabold tracking-tight">Escolhe um copo!</h2>
+        <h2 className="mt-2 text-4xl font-extrabold tracking-tight">{heading}</h2>
         <ProgressDots round={round} />
       </div>
 
-      <button
-        disabled={locked}
-        onClick={() => {
-          const random = Math.floor(Math.random() * 3);
-          onPick(random);
-        }}
-        className="btn-primary btn-primary-hover mt-8 w-full py-4 text-base tracking-wide disabled:opacity-60"
-      >
-        ESCOLHE UM COPO!
-      </button>
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        {phase === "show" && "A bola está debaixo deste copo. Segue-a!"}
+        {phase === "shuffle" && "Mantém o olho no copo certo…"}
+        {phase === "choose" && "Toca no copo onde achas que está a bola."}
+        {phase === "revealed" && " "}
+      </p>
 
-      <div className="mt-auto mb-12 grid grid-cols-3 gap-3">
-        {[0, 1, 2].map((i) => {
-          const isPicked = pickedCup === i;
-          const reveal = locked && i === winningCup;
+      {/* Stage with absolutely-positioned cups that slide between slots */}
+      <div className="relative mx-auto mt-10 h-[180px] w-full max-w-[360px]">
+        {[0, 1, 2].map((cupId) => {
+          const slot = slotOf[cupId];
+          const isWinning = cupId === winningCup;
+          const lifted = phase === "show" && isWinning;
+          const revealHere = phase === "revealed" && isWinning;
+          const isPicked = pickedCup === cupId;
           return (
             <button
-              key={i}
-              onClick={() => !locked && onPick(i)}
+              key={cupId}
+              onClick={() => phase === "choose" && onPick(cupId)}
               disabled={locked}
-              className={`relative flex flex-col items-center justify-end rounded-2xl border-2 p-3 transition ${
+              style={{
+                transform: `translateX(${slot * 120}px) translateY(${lifted ? -28 : 0}px)`,
+                transition: "transform 360ms cubic-bezier(.4,.0,.2,1)",
+              }}
+              className={`absolute left-0 top-2 flex h-[150px] w-[110px] flex-col items-center justify-end rounded-2xl border-2 p-2 ${
                 isPicked
                   ? "border-primary bg-primary/10"
-                  : "border-primary/50 bg-card/40 hover:border-primary"
+                  : phase === "choose"
+                  ? "border-primary/60 bg-card/40 hover:border-primary cursor-pointer"
+                  : "border-border bg-card/30 cursor-default"
               }`}
             >
-              <span className="absolute -top-3 text-xl">👆</span>
-              <Cup size={80} glow={reveal} />
+              {/* Ball visible when cup is lifted in show phase, or when revealed */}
+              {(lifted || revealHere) && (
+                <span
+                  className="absolute bottom-3 grid h-9 w-9 place-items-center rounded-full bg-yellow-400 text-base shadow-lg"
+                  style={{ boxShadow: "0 0 24px oklch(0.85 0.18 90 / 0.7)" }}
+                >
+                  💰
+                </span>
+              )}
+              <Cup size={90} glow={lifted || revealHere} />
             </button>
           );
         })}
       </div>
+
+      <div className="mt-auto mb-10" />
     </section>
   );
 }
