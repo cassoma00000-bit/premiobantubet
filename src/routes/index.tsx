@@ -234,7 +234,7 @@ function IntroModal({ onPlay, onClose }: { onPlay: () => void; onClose: () => vo
         </div>
 
         <div className="mt-5 flex justify-center">
-          <div className="rounded-xl bg-background-deep/60 px-3 py-2">
+          <div className="rounded-xl bg-black/30 px-3 py-2">
             <Logo size="md" />
           </div>
         </div>
@@ -623,7 +623,7 @@ function Done({ amount, onRestart }: { amount: number; onRestart: () => void }) 
         <p className="mt-2 text-sm text-muted-foreground">
           O teu prémio será transferido para a tua conta BantuBet em instantes.
         </p>
-        <div className="mt-5 rounded-xl bg-background-deep/60 py-4 text-3xl font-extrabold text-primary">
+        <div className="mt-5 rounded-xl bg-black/30 py-4 text-3xl font-extrabold text-primary">
           {formatKz(amount)} Kz
         </div>
         <button onClick={onRestart} className="btn-primary btn-primary-hover mt-6 w-full py-4">
