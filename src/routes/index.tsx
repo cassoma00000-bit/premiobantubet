@@ -351,7 +351,7 @@ function Pick({
   const [slotOf, setSlotOf] = useState<[number, number, number]>([0, 1, 2]);
   const [phase, setPhase] = useState<PickPhase>("show");
 
-  // Reset whenever winningCup changes (new round)
+  // Reset whenever the round changes
   useEffect(() => {
     setSlotOf([0, 1, 2]);
     setPhase("show");
@@ -362,7 +362,7 @@ function Pick({
     }, 1300);
 
     return () => clearTimeout(showTimer);
-  }, [winningCup]);
+  }, [round]);
 
   // Shuffle sequence
   useEffect(() => {
