@@ -54,6 +54,7 @@ function Index() {
   const [winningCup, setWinningCup] = useState(0);
   const [pickedCup, setPickedCup] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(3);
+  const [outcomes, setOutcomes] = useState<boolean[]>(() => buildOutcomes());
 
   // Prepare countdown
   useEffect(() => {
@@ -63,7 +64,6 @@ function Index() {
       setCountdown((c) => {
         if (c <= 1) {
           clearInterval(id);
-          // ensure winning cup for new round
           setWinningCup(Math.floor(Math.random() * 3));
           setPickedCup(null);
           setStage("pick");
@@ -78,6 +78,7 @@ function Index() {
   const startGame = () => {
     setBalance(0);
     setRound(1);
+    setOutcomes(buildOutcomes());
     setStage("intro");
   };
 
@@ -89,9 +90,15 @@ function Index() {
 
   const onPickCup = (i: number) => {
     setPickedCup(i);
-    const isWin = i === winningCup;
+    const shouldWin = outcomes[round - 1];
+    // Force the outcome by reassigning the winning cup
+    if (shouldWin) {
+      setWinningCup(i);
+    } else if (i === winningCup) {
+      setWinningCup((i + 1) % 3);
+    }
     setTimeout(() => {
-      if (isWin) {
+      if (shouldWin) {
         const reward = REWARDS[Math.floor(Math.random() * REWARDS.length)];
         setLastWin(reward);
         setBalance((b) => b + reward);
