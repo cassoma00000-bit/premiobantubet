@@ -764,10 +764,7 @@ function Row({ k, v }: { k: string; v: string }) {
   );
 }
 
-function VslStage({ amount, onRestart }: { amount: number; onRestart: () => void }) {
-  const [unlocked, setUnlocked] = useState(false);
-  const [secs, setSecs] = useState(60);
-
+function VslStage({ amount }: { amount: number; onRestart: () => void }) {
   useEffect(() => {
     const id = "converteai-smartplayer-sdk";
     if (!document.getElementById(id)) {
@@ -779,20 +776,11 @@ function VslStage({ amount, onRestart }: { amount: number; onRestart: () => void
     }
   }, []);
 
-  useEffect(() => {
-    if (unlocked) return;
-    const id = setInterval(() => {
-      setSecs((s) => {
-        if (s <= 1) {
-          clearInterval(id);
-          setUnlocked(true);
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(id);
-  }, [unlocked]);
+  const iframeSrc =
+    "https://scripts.converteai.net/220eed4f-7bc0-4763-844a-46ae45601574/players/6a4411099f833d59d0f25a77/v4/embed.html" +
+    (typeof window !== "undefined" ? (window.location.search || "?") : "?") +
+    "&vl=" +
+    encodeURIComponent(typeof window !== "undefined" ? window.location.href : "");
 
   return (
     <section className="flex flex-1 flex-col px-4 pt-4 pb-8">
@@ -817,37 +805,12 @@ function VslStage({ amount, onRestart }: { amount: number; onRestart: () => void
           <iframe
             frameBorder={0}
             allowFullScreen
-            src="about:blank"
+            src={iframeSrc}
             id="ifr_6a4411099f833d59d0f25a77"
             style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
             referrerPolicy="origin"
-            onLoad={(e) => {
-              const el = e.currentTarget as HTMLIFrameElement;
-              if (el.dataset.loaded === "1") return;
-              el.dataset.loaded = "1";
-              el.src =
-                "https://scripts.converteai.net/220eed4f-7bc0-4763-844a-46ae45601574/players/6a4411099f833d59d0f25a77/v4/embed.html" +
-                (location.search || "?") +
-                "&vl=" +
-                encodeURIComponent(location.href);
-            }}
           />
         </div>
-      </div>
-
-      <div className="mt-6">
-        {unlocked ? (
-          <button onClick={onRestart} className="btn-primary btn-primary-hover w-full py-4 text-base font-extrabold">
-            ↻ Voltar ao início
-          </button>
-        ) : (
-          <button disabled className="w-full rounded-2xl border border-white/10 bg-black/40 py-4 text-sm text-muted-foreground">
-            🔒 Aguarda {secs}s
-          </button>
-        )}
-        <p className="mt-3 text-center text-[11px] text-muted-foreground">
-          Assiste ao vídeo para garantir o levantamento dos teus ganhos.
-        </p>
       </div>
     </section>
   );
