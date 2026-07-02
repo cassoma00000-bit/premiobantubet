@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Cup } from "@/components/Cup";
+import flySkuadAvatar from "@/assets/fly-skuad-avatar.jpg";
+
 
 type Stage =
   | "landing"
