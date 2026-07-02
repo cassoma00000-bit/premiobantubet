@@ -239,7 +239,7 @@ function IntroModal({ onPlay, onClose }: { onPlay: () => void; onClose: () => vo
         <h2 className="mt-5 text-center text-3xl font-extrabold tracking-tight">Acerta e Ganha</h2>
 
         <p className="mt-3 text-center text-[15px] leading-relaxed text-foreground/90">
-          <span className="font-bold">15 rodadas grátis</span> para celebrar os{" "}
+          <span className="font-bold">{TOTAL_ROUNDS} rodadas grátis</span> para celebrar os{" "}
           <span className="font-bold">5 anos da BantuBet</span>.
         </p>
 
