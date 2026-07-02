@@ -780,21 +780,46 @@ function VslStage({ amount }: { amount: number; onRestart: () => void }) {
     "&vl=" +
     encodeURIComponent(typeof window !== "undefined" ? window.location.href : "");
 
-  return (
-    <section className="flex flex-1 flex-col px-4 pt-4 pb-8">
-      <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full bg-black/40 border border-white/10 px-4 py-1.5 text-sm">
-        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-        <span className="font-bold">{formatKz(amount)} Kz</span>
-        <span className="text-muted-foreground">aguardando</span>
-      </div>
-      <h2 className="text-center text-base font-extrabold leading-snug px-2">
-        Veja agora como registar a sua conta BantuBet e liberar os seus ganhos em menos de{" "}
-        <span className="text-primary">2 minutos</span>
-      </h2>
+  const comments: Array<{
+    name: string;
+    time: string;
+    text: string;
+    likes: string;
+    creator?: boolean;
+    avatarBg: string;
+  }> = [
+    { name: "Maria Santos", time: "há 2 horas", text: `Acabei de receber meus ${formatKz(amount)} Kz! Pensei que era mentira mas funcionou mesmo. Obrigada BantuBet!`, likes: "4,3 mil", avatarBg: "#c2410c" },
+    { name: "João Pedro", time: "há 5 horas", text: "Funciona pra quem nunca usou a BantuBet antes?", likes: "892", avatarBg: "#1e3a8a" },
+    { name: "Fly Skuad TV", time: "há 4 horas", creator: true, text: "@João Pedro Sim! O evento de 5 anos é para todos, novos e antigos usuários. Só precisa criar conta e completar o perfil.", likes: "1,2 mil", avatarBg: "#ea580c" },
+    { name: "Ana Beatriz", time: "há 1 dia", text: "Meu marido não acreditava, mostrei o comprovante e ele ficou chocado kkkk", likes: "2,1 mil", avatarBg: "#9d174d" },
+    { name: "Carlos Eduardo", time: "há 2 dias", text: "Já era cliente da BantuBet, esse evento de aniversário foi a melhor coisa que fizeram!", likes: "1,5 mil", avatarBg: "#065f46" },
+    { name: "Fernanda Lima", time: "há 3 horas", text: "Quanto tempo demora pra cair na conta?", likes: "456", avatarBg: "#4c1d95" },
+    { name: "Fly Skuad TV", time: "há 2 horas", creator: true, text: "@Fernanda Lima Normalmente cai em até 24h úteis pelo Multicaixa Express. Por IBAN pode demorar 2-3 dias.", likes: "789", avatarBg: "#ea580c" },
+    { name: "Ricardo Mendes", time: "há 6 horas", text: "Comecei ontem e já ganhei mais de 100 mil Kz no jogo dos copos. Muito fácil!", likes: "3,2 mil", avatarBg: "#334155" },
+    { name: "Patrícia Oliveira", time: "há 1 dia", text: "Gente, é real! Recebi hoje de manhã. Deus abençoe a BantuBet", likes: "1,8 mil", avatarBg: "#7c2d12" },
+    { name: "Miguel Costa", time: "há 4 horas", text: "Precisa depositar alguma coisa antes?", likes: "234", avatarBg: "#166534" },
+    { name: "Fly Skuad TV", time: "há 3 horas", creator: true, text: "@Miguel Costa Não! O evento é 100% grátis. Você só joga as 12 rodadas e levanta os ganhos.", likes: "567", avatarBg: "#ea580c" },
+    { name: "Juliana Ferreira", time: "há 2 dias", text: "Melhor promoção que já vi em Angola. 5 anos de BantuBet e muitos mais!", likes: "2,8 mil", avatarBg: "#6b21a8" },
+  ];
 
+  return (
+    <section className="flex flex-1 flex-col bg-black text-white">
+      {/* YouTube header */}
+      <div className="flex items-center gap-2 px-3 py-2 bg-black">
+        <div className="flex items-center gap-1">
+          <span className="grid h-6 w-8 place-items-center rounded bg-red-600 text-white text-xs font-bold">▶</span>
+          <span className="text-[17px] font-semibold tracking-tight">YouTube</span>
+        </div>
+        <div className="ml-2 flex flex-1 items-center gap-2 rounded-full bg-neutral-800 px-3 py-1.5">
+          <span className="text-sm text-neutral-400">Pesquisar</span>
+          <span className="ml-auto text-neutral-300">🔍</span>
+        </div>
+      </div>
+
+      {/* VSL / "video" */}
       <div
         id="ifr_6a4411099f833d59d0f25a77_wrapper"
-        style={{ margin: "16px auto 0", width: "100%", maxWidth: 400 }}
+        style={{ margin: "0 auto", width: "100%", maxWidth: 400 }}
       >
         <div
           id="ifr_6a4411099f833d59d0f25a77_aspect"
@@ -808,6 +833,83 @@ function VslStage({ amount }: { amount: number; onRestart: () => void }) {
             style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
             referrerPolicy="origin"
           />
+        </div>
+      </div>
+
+      {/* Watch-to-earn banner */}
+      <div className="mx-3 mt-3 rounded-2xl border border-emerald-500/40 px-4 py-3 text-center">
+        <span className="text-[15px] font-bold">Assista até o final para levantar seus {formatKz(amount)} Kz</span>
+      </div>
+
+      {/* Title */}
+      <h1 className="mt-4 px-3 text-[17px] font-bold leading-tight">
+        BANTUBET 5 ANOS - Como Levantar os Seus Ganhos do Evento de Aniversário | Tutorial Completo
+      </h1>
+
+      {/* Channel row */}
+      <div className="mt-3 flex items-center gap-3 px-3">
+        <div className="grid h-10 w-10 place-items-center rounded-full bg-orange-600 text-sm font-bold">FS</div>
+        <div className="flex-1">
+          <div className="flex items-center gap-1 text-[14px] font-semibold">
+            Fly Skuad TV
+            <span className="grid h-4 w-4 place-items-center rounded-full bg-neutral-400 text-black text-[10px]">✓</span>
+          </div>
+          <div className="text-xs text-neutral-400">579 mil inscritos</div>
+        </div>
+        <button className="rounded-full bg-white px-4 py-1.5 text-sm font-bold text-black">INSCREVER-SE</button>
+      </div>
+
+      {/* Description card */}
+      <div className="mx-3 mt-3 rounded-xl bg-neutral-900 p-3">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px]">
+          <span className="font-semibold">1,2 mi de visualizações</span>
+          <span className="text-neutral-400">há 3 dias</span>
+          <span className="text-sky-400">#BantuBet</span>
+          <span className="text-sky-400">#5Anos</span>
+          <span className="text-sky-400">#Angola</span>
+        </div>
+        <p className="mt-2 text-[13px] leading-relaxed">
+          <span className="font-bold">EVENTO OFICIAL DE 5 ANOS DA BANTUBET!</span> Neste vídeo, mostro passo a passo como você pode participar do evento de aniversário e levantar seus ganhos de até 120.000 Kz!
+        </p>
+      </div>
+
+      {/* Comments */}
+      <div className="mt-5 px-3">
+        <div className="flex items-center gap-4 text-[15px]">
+          <span className="font-semibold">12 comentários</span>
+          <span className="flex items-center gap-1 text-neutral-300">≡ Ordenar por</span>
+        </div>
+        <div className="mt-3 flex items-center gap-3">
+          <div className="grid h-8 w-8 place-items-center rounded-full bg-purple-600 text-sm font-bold">U</div>
+          <span className="text-sm text-neutral-400">Adicione um comentário...</span>
+        </div>
+
+        <div className="mt-4 space-y-5 pb-8">
+          {comments.map((c, i) => (
+            <div key={i} className="flex gap-3">
+              <div
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-bold"
+                style={{ background: c.avatarBg }}
+              >
+                {c.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+              </div>
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-2 text-[12px] text-neutral-400">
+                  <span className="text-[13px] font-semibold text-white">{c.name}</span>
+                  {c.creator && (
+                    <span className="rounded bg-neutral-700 px-1.5 py-0.5 text-[11px] font-semibold text-white">Criador</span>
+                  )}
+                  <span>{c.time}</span>
+                </div>
+                <p className="mt-1 text-[13px] leading-snug">{c.text}</p>
+                <div className="mt-2 flex items-center gap-4 text-neutral-400 text-[12px]">
+                  <span className="flex items-center gap-1">👍 <span>{c.likes}</span></span>
+                  <span>👎</span>
+                  <span className="font-semibold">Responder</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
