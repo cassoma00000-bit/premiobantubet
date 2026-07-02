@@ -14,19 +14,17 @@ type Stage =
   | "vsl";
 
 const TOTAL_ROUNDS = 12;
-const WINS_TOTAL = 6;
-const REWARDS = [18000, 20000, 22000, 25000];
+const WINS_TOTAL = 3;
+const REWARDS = [30000];
 
 function buildOutcomes(): boolean[] {
-  const arr = [
-    ...Array(WINS_TOTAL).fill(true),
-    ...Array(TOTAL_ROUNDS - WINS_TOTAL).fill(false),
-  ];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr as boolean[];
+  const arr = Array(TOTAL_ROUNDS).fill(false);
+  // 1 vitória no meio (rodada 6 ou 7) e 2 vitórias no fim (rodadas 11 e 12)
+  const middleIndex = Math.random() < 0.5 ? 5 : 6;
+  arr[middleIndex] = true;
+  arr[10] = true;
+  arr[11] = true;
+  return arr;
 }
 
 function formatKz(n: number) {
