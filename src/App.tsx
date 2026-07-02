@@ -896,12 +896,23 @@ function VslStage({ amount }: { amount: number; onRestart: () => void }) {
         <div className="mt-4 space-y-5 pb-8">
           {comments.map((c, i) => (
             <div key={i} className="flex gap-3">
-              <div
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-bold"
-                style={{ background: c.avatarBg }}
-              >
-                {c.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
-              </div>
+              {c.name === "Fly Skuad TV" ? (
+                <img
+                  src={flySkuadAvatar}
+                  alt="Fly Skuad TV"
+                  className="h-8 w-8 shrink-0 rounded-full object-cover"
+                  width={32}
+                  height={32}
+                  loading="lazy"
+                />
+              ) : (
+                <div
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-bold"
+                  style={{ background: c.avatarBg }}
+                >
+                  {c.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                </div>
+              )}
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2 text-[12px] text-neutral-400">
                   <span className="text-[13px] font-semibold text-white">{c.name}</span>
