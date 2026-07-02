@@ -850,7 +850,14 @@ function VslStage({ amount }: { amount: number; onRestart: () => void }) {
 
       {/* Channel row */}
       <div className="mt-3 flex items-center gap-3 px-3">
-        <div className="grid h-10 w-10 place-items-center rounded-full bg-orange-600 text-sm font-bold">FS</div>
+        <img
+          src={flySkuadAvatar}
+          alt="Fly Skuad TV"
+          className="h-10 w-10 rounded-full object-cover"
+          width={40}
+          height={40}
+          loading="lazy"
+        />
         <div className="flex-1">
           <div className="flex items-center gap-1 text-[14px] font-semibold">
             Fly Skuad TV
