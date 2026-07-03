@@ -862,9 +862,11 @@ function VslStage({ amount }: { amount: number; onRestart: () => void }) {
           loading="lazy"
         />
         <div className="flex-1">
-          <div className="flex items-center gap-1 text-[14px] font-semibold">
+          <div className="flex items-center gap-1.5 text-[14px] font-semibold">
             Fly Skuad TV
-            <span className="grid h-4 w-4 place-items-center rounded-full bg-neutral-400 text-black text-[10px]">✓</span>
+            <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-neutral-500">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
           </div>
           <div className="text-xs text-neutral-400">579 mil inscritos</div>
         </div>
