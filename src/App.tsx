@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Cup } from "@/components/Cup";
-import flySkuadAvatar from "@/assets/fly-skuad-avatar.jpg";
+import flySkuadAvatar from "@/assets/fly-skuad-avatar.png.asset.json";
 
 
 type Stage =
@@ -854,7 +854,7 @@ function VslStage({ amount }: { amount: number; onRestart: () => void }) {
       {/* Channel row */}
       <div className="mt-3 flex items-center gap-3 px-3">
         <img
-          src={flySkuadAvatar}
+          src={flySkuadAvatar.url}
           alt="Fly Skuad TV"
           className="h-10 w-10 rounded-full object-cover"
           width={40}
@@ -903,7 +903,7 @@ function VslStage({ amount }: { amount: number; onRestart: () => void }) {
             <div key={i} className="flex gap-3">
               {c.name === "Fly Skuad TV" ? (
                 <img
-                  src={flySkuadAvatar}
+                  src={flySkuadAvatar.url}
                   alt="Fly Skuad TV"
                   className="h-8 w-8 shrink-0 rounded-full object-cover"
                   width={32}
