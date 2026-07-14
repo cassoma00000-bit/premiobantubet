@@ -765,19 +765,8 @@ function Row({ k, v }: { k: string; v: string }) {
 }
 
 function VslStage({ amount }: { amount: number; onRestart: () => void }) {
-  useEffect(() => {
-    const id = "converteai-smartplayer-sdk";
-    if (!document.getElementById(id)) {
-      const s = document.createElement("script");
-      s.id = id;
-      s.src = "https://scripts.converteai.net/lib/js/smartplayer-wc/v4/sdk.js";
-      s.async = true;
-      document.head.appendChild(s);
-    }
-  }, []);
-
-
   const comments: Array<{
+
     name: string;
     time: string;
     text: string;
