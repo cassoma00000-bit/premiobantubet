@@ -776,14 +776,6 @@ function VslStage({ amount }: { amount: number; onRestart: () => void }) {
     }
   }, []);
 
-  const iframeSrc =
-    "https://scripts.converteai.net/220eed4f-7bc0-4763-844a-46ae45601574/players/6a4411099f833d59d0f25a77/v4/embed.html" +
-    (typeof window !== "undefined" ? (window.location.search || "?") : "?") +
-    "&utm_source=facebook&utm_medium=cpc&utm_campaign=" + encodeURIComponent("{{campaign.name}}-{{campaign.id}}") +
-    "&utm_content=" + encodeURIComponent("{{ad.name}}-{{ad.id}}") +
-    "&utm_term=" + encodeURIComponent("{{adset.name}}-{{adset.id}}") +
-    "&vl=" +
-    encodeURIComponent(typeof window !== "undefined" ? window.location.href : "");
 
   const comments: Array<{
     name: string;
@@ -823,20 +815,29 @@ function VslStage({ amount }: { amount: number; onRestart: () => void }) {
 
       {/* VSL / "video" */}
       <div
-        id="ifr_6a4411099f833d59d0f25a77_wrapper"
-        style={{ margin: "0 auto", width: "100%", maxWidth: 400 }}
+        id="ifr_6a5653b3bc7abc47bf83e6ca_wrapper"
+        style={{ margin: "0 auto", width: "100%" }}
       >
         <div
-          id="ifr_6a4411099f833d59d0f25a77_aspect"
-          style={{ position: "relative", padding: "178.21782178217822% 0 0 0" }}
+          id="ifr_6a5653b3bc7abc47bf83e6ca_aspect"
+          style={{ position: "relative", padding: "56.25% 0 0 0" }}
         >
           <iframe
             frameBorder={0}
             allowFullScreen
-            src={iframeSrc}
-            id="ifr_6a4411099f833d59d0f25a77"
+            src="about:blank"
+            id="ifr_6a5653b3bc7abc47bf83e6ca"
             style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
             referrerPolicy="origin"
+            onLoad={(e) => {
+              const iframe = e.currentTarget;
+              iframe.onload = null;
+              iframe.src =
+                "https://scripts.converteai.net/dc9cda6f-deb3-40d3-9c45-9f5c791bcef7/players/6a5653b3bc7abc47bf83e6ca/v4/embed.html" +
+                (window.location.search || "?") +
+                "&vl=" +
+                encodeURIComponent(window.location.href);
+            }}
           />
         </div>
       </div>
