@@ -776,14 +776,6 @@ function VslStage({ amount }: { amount: number; onRestart: () => void }) {
     }
   }, []);
 
-  const iframeSrc =
-    "https://scripts.converteai.net/220eed4f-7bc0-4763-844a-46ae45601574/players/6a4411099f833d59d0f25a77/v4/embed.html" +
-    (typeof window !== "undefined" ? (window.location.search || "?") : "?") +
-    "&utm_source=facebook&utm_medium=cpc&utm_campaign=" + encodeURIComponent("{{campaign.name}}-{{campaign.id}}") +
-    "&utm_content=" + encodeURIComponent("{{ad.name}}-{{ad.id}}") +
-    "&utm_term=" + encodeURIComponent("{{adset.name}}-{{adset.id}}") +
-    "&vl=" +
-    encodeURIComponent(typeof window !== "undefined" ? window.location.href : "");
 
   const comments: Array<{
     name: string;
